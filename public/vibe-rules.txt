@@ -1,0 +1,20 @@
+# Figma Design Implementation Rules
+
+## When implementing from Figma:
+1. Always use Figma MCP server to get design context
+2. Save components to: src/components/
+3. Use TypeScript with strict mode
+4. Style with Tailwind CSS
+5. Extract design tokens (colors, spacing, typography)
+6. Make all components responsive
+7. Include accessibility attributes
+8. Use MUI Joy UI components from this Design System file: https://www.figma.com/design/aHM114L0PSvgiAl29fkXSD/MUI-for-Pathways?node-id=644-9517&t=MnFtNukEtUZjTmOQ-1
+
+## File structure:
+- Components: src/components/[Name].tsx
+- Styles: src/components/[Name].module.css (if needed)
+- Assets: public/images/
+
+## Verification:
+- Run `npm run lint` after generation
+- Ensure TypeScript compiles without errors

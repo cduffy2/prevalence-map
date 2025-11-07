@@ -1,26 +1,71 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap');
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+  /* Colors - extracted from Figma design system */
+  --common-white: #ffffff;
+  --background-page-background: #FCFCF6;
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+  /* Primary colors */
+  --primary-600: #185ea5;
+  --primary-200: #c7dff7;
+  --primary-plain-color: #0b6bcb;
+  --primary-plain-hoverbg: #e3effb;
+  --primary-outlined-border: #97c3f0;
+  --primary-outlined-color: #0b6bcb;
+  --primary-solid-activebg: #0a2744;
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  /* Text colors */
+  --text-primary: #171a1c;
+  --text-secondary-inverse: #cdd7e1;
+  --text-tertiary: #555e68;
+  --text-tertiary-inverse: rgba(255, 255, 255, 0.6);
+  --text-primary-inverse: #f0f4f8;
+  --text-link-hover: #0857a7;
+
+  /* Divider */
+  --divider: rgba(99, 107, 116, 0.3);
+
+  /* Border radius */
+  --radius-sm: 6px;
+  --radius-lg: 12px;
+
+  /* Vulnerability colors */
+  --vulnerability-most-bg: #f2a0ac;
+  --vulnerability-most-dark: #690133;
+  --vulnerability-more-bg: #b5a4ea;
+  --vulnerability-more-dark: #6F22A8;
+  --vulnerability-less-bg: #76b5e5;
+  --vulnerability-less-dark: #001E5E;
+  --vulnerability-least-bg: #71d6db;
+  --vulnerability-least-dark: #003D1B;
+
+  /* Level colors */
+  --level-1: #E5F0F8;
+
+  /* Hover border color */
+  --hover-border: #026ACC;
+
+  /* Background colors */
+  --background-body: #ffffff;
+
+  /* Neutral colors */
+  --neutral-600: #636B74;
+
+  /* Data colors */
+  --data-categorical-1-main: #88C1FD;
+  --data-categorical-1-light: #E3F2FD;
+
+  /* Fonts */
+  --font-inter: 'Inter', sans-serif;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  margin: 0;
+  padding: 0;
+  font-family: var(--font-inter);
+  background: var(--background-page-background);
+  color: var(--text-primary);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
