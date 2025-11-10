@@ -323,9 +323,17 @@ export default function StackedBarChart({
                 const minHeight = 16;
                 const maxHeight = 200;
 
-                // Use simple linear scaling: 1% = 16px, scale up to 200px at max
-                // This ensures 5% is exactly half of 10%, 11% is double 5.5%, etc.
-                barHeight = minHeight + (districtPercentage / 100) * (maxHeight - minHeight);
+                // Use logarithmic scaling to make small differences more perceptible
+                const normalizedPercent = districtPercentage / 100; // 0 to 1
+
+                // Use log10 scaling with base adjustment for better perception
+                const logMin = Math.log10(0.01 + 0.01); // log of 1%
+                const logMax = Math.log10(1 + 0.01); // log of 100%
+                const logValue = Math.log10(normalizedPercent + 0.01);
+                const scaledValue = (logValue - logMin) / (logMax - logMin);
+
+                // Map to height range
+                barHeight = minHeight + (scaledValue * (maxHeight - minHeight));
               }
               const barHeightScale = barHeight / 40;
 
