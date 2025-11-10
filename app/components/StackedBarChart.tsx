@@ -4,6 +4,7 @@ import { useMemo, useState } from 'react';
 import Image from 'next/image';
 import Button from '@mui/joy/Button';
 import ExportModal from './ExportModal';
+import DataInterpretationNotification from './DataInterpretationNotification';
 
 export interface SegmentData {
   'Urban-1': number;
@@ -29,6 +30,9 @@ interface StackedBarChartProps {
   populationType: 'both' | 'urban' | 'rural';
   onPopulationTypeChange: (type: 'both' | 'urban' | 'rural') => void;
   onDistrictRemove: (districtName: string) => void;
+  showNotification?: boolean;
+  onCloseNotification?: () => void;
+  onViewSourceData?: () => void;
 }
 
 const segmentColors: Record<keyof SegmentData, string> = {
@@ -46,7 +50,15 @@ const segmentColors: Record<keyof SegmentData, string> = {
 
 import { senegalDistricts } from '../../lib/districtData';
 
-export default function StackedBarChart({ districts, populationType, onPopulationTypeChange, onDistrictRemove }: StackedBarChartProps) {
+export default function StackedBarChart({
+  districts,
+  populationType,
+  onPopulationTypeChange,
+  onDistrictRemove,
+  showNotification = false,
+  onCloseNotification,
+  onViewSourceData
+}: StackedBarChartProps) {
   const [hoveredDistrict, setHoveredDistrict] = useState<string | null>(null);
   const [hoveredSegment, setHoveredSegment] = useState<{ district: string; segment: keyof SegmentData | 'urban-overview' | 'rural-overview' } | null>(null);
   const [hoveredBar, setHoveredBar] = useState<string | null>(null);
@@ -272,6 +284,17 @@ export default function StackedBarChart({ districts, populationType, onPopulatio
       {/* Chart Area */}
       <div className="flex-1 overflow-auto" style={{ minHeight: 0, overflowX: 'visible' }}>
         <div className="px-4 py-4" style={{ overflow: 'visible' }}>
+          {/* Notification */}
+          {showNotification && onCloseNotification && onViewSourceData && (
+            <div className="mb-4">
+              <DataInterpretationNotification
+                isVisible={showNotification}
+                onClose={onCloseNotification}
+                onViewDetails={onViewSourceData}
+              />
+            </div>
+          )}
+
           {/* Y-axis scale */}
           <div className="flex items-start gap-4 mb-5">
             <div className="w-32 flex-shrink-0"></div>
@@ -300,19 +323,9 @@ export default function StackedBarChart({ districts, populationType, onPopulatio
                 const minHeight = 16;
                 const maxHeight = 200;
 
-                // Use logarithmic scaling to make small differences more perceptible
-                // This creates more dramatic visual differences, especially in lower percentages
-                const normalizedPercent = districtPercentage / 100; // 0 to 1
-
-                // Use log10 scaling with base adjustment for better perception
-                // Add 0.01 to avoid log(0), and scale so 1% -> minHeight, 100% -> maxHeight
-                const logMin = Math.log10(0.01 + 0.01); // log of 1%
-                const logMax = Math.log10(1 + 0.01); // log of 100%
-                const logValue = Math.log10(normalizedPercent + 0.01);
-                const scaledValue = (logValue - logMin) / (logMax - logMin);
-
-                // Map to height range
-                barHeight = minHeight + (scaledValue * (maxHeight - minHeight));
+                // Use simple linear scaling: 1% = 16px, scale up to 200px at max
+                // This ensures 5% is exactly half of 10%, 11% is double 5.5%, etc.
+                barHeight = minHeight + (districtPercentage / 100) * (maxHeight - minHeight);
               }
               const barHeightScale = barHeight / 40;
 

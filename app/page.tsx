@@ -9,7 +9,6 @@ import EmptyState from './components/EmptyState';
 import StackedBarChart from './components/StackedBarChart';
 import PieChart from './components/PieChart';
 import GeographicalSearchDropdown from './components/GeographicalSearchDropdown';
-import DataInterpretationNotification from './components/DataInterpretationNotification';
 import SourceDataModal from './components/SourceDataModal';
 import Footer from './components/Footer';
 import { getDistrictByName, senegalDistricts, type DistrictData } from '../lib/districtData';
@@ -89,41 +88,26 @@ export default function Home() {
             </div>
 
             {/* Right Container - Charts or Empty State */}
-            <div className="flex-1 bg-white border-t border-r border-b border-[var(--primary-outlined-border)] rounded-r-lg flex flex-col" style={{ minHeight: '584px' }}>
+            <div className="flex-1 bg-white border-t border-r border-b border-[var(--primary-outlined-border)] rounded-r-lg" style={{ minHeight: '584px' }}>
               {selectedDistricts.length === 0 ? (
                 <EmptyState />
+              ) : viewMode === 'stacked' ? (
+                <StackedBarChart
+                  districts={selectedDistricts}
+                  populationType={populationType}
+                  onPopulationTypeChange={setPopulationType}
+                  onDistrictRemove={handleDistrictRemove}
+                  showNotification={showNotification}
+                  onCloseNotification={() => setShowNotification(false)}
+                  onViewSourceData={() => setIsSourceModalOpen(true)}
+                />
               ) : (
-                <>
-                  {/* Notification */}
-                  {showNotification && (
-                    <div className="px-4 pt-4">
-                      <DataInterpretationNotification
-                        isVisible={showNotification}
-                        onClose={() => setShowNotification(false)}
-                        onViewDetails={() => setIsSourceModalOpen(true)}
-                      />
-                    </div>
-                  )}
-
-                  {/* Chart */}
-                  <div className="flex-1 flex flex-col">
-                    {viewMode === 'stacked' ? (
-                      <StackedBarChart
-                        districts={selectedDistricts}
-                        populationType={populationType}
-                        onPopulationTypeChange={setPopulationType}
-                        onDistrictRemove={handleDistrictRemove}
-                      />
-                    ) : (
-                      <PieChart
-                        districts={selectedDistricts}
-                        populationType={populationType}
-                        onPopulationTypeChange={setPopulationType}
-                        onDistrictRemove={handleDistrictRemove}
-                      />
-                    )}
-                  </div>
-                </>
+                <PieChart
+                  districts={selectedDistricts}
+                  populationType={populationType}
+                  onPopulationTypeChange={setPopulationType}
+                  onDistrictRemove={handleDistrictRemove}
+                />
               )}
             </div>
           </div>
