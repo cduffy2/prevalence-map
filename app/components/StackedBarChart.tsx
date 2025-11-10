@@ -48,7 +48,7 @@ import { senegalDistricts } from '../../lib/districtData';
 
 export default function StackedBarChart({ districts, populationType, onPopulationTypeChange, onDistrictRemove }: StackedBarChartProps) {
   const [hoveredDistrict, setHoveredDistrict] = useState<string | null>(null);
-  const [hoveredSegment, setHoveredSegment] = useState<{ district: string; segment: keyof SegmentData } | null>(null);
+  const [hoveredSegment, setHoveredSegment] = useState<{ district: string; segment: keyof SegmentData | 'urban-overview' | 'rural-overview' } | null>(null);
   const [hoveredBar, setHoveredBar] = useState<string | null>(null);
   const [hoveredRemoveButton, setHoveredRemoveButton] = useState<string | null>(null);
   const [showPopulationShare, setShowPopulationShare] = useState(false);
