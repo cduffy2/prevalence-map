@@ -2,6 +2,7 @@
 
 import Image from 'next/image';
 import { useState } from 'react';
+import SourceDataModal from './SourceDataModal';
 
 interface PageTitleProps {
   viewMode: 'stacked' | 'pie';
@@ -11,16 +12,29 @@ interface PageTitleProps {
 export default function PageTitle({ viewMode, onViewModeChange }: PageTitleProps) {
   const [hoveredStackedButton, setHoveredStackedButton] = useState(false);
   const [hoveredPieButton, setHoveredPieButton] = useState(false);
+  const [isSourceModalOpen, setIsSourceModalOpen] = useState(false);
 
   return (
     <div className="border-b border-gray-100" style={{ marginTop: '40px' }}>
       <div className="max-w-[1360px] mx-auto px-10 py-4">
         <div className="flex items-center justify-between">
-          {/* Left: Title */}
-          <div className="flex items-center gap-2">
+          {/* Left: Title and Source Data Button */}
+          <div className="flex items-center gap-3">
             <h1 className="text-2xl font-semibold leading-[1.5] text-[var(--text-primary)]">
               Prevalence map
             </h1>
+            <button
+              onClick={() => setIsSourceModalOpen(true)}
+              className="flex items-center gap-2 px-3 py-2 text-sm font-semibold text-[var(--primary-plain-color)] rounded-[var(--radius-sm)] hover:bg-[var(--primary-plain-hoverbg)] transition-colors"
+            >
+              <Image
+                src="/Assets/Icons/InfoOutlined.svg"
+                alt="Info"
+                width={20}
+                height={20}
+              />
+              View source data details
+            </button>
           </div>
 
           {/* Right: View Toggle */}
@@ -110,6 +124,9 @@ export default function PageTitle({ viewMode, onViewModeChange }: PageTitleProps
           </div>
         </div>
       </div>
+
+      {/* Source Data Modal */}
+      <SourceDataModal isOpen={isSourceModalOpen} onClose={() => setIsSourceModalOpen(false)} />
     </div>
   );
 }

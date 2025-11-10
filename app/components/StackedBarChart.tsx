@@ -32,7 +32,6 @@ interface StackedBarChartProps {
   onDistrictRemove: (districtName: string) => void;
   showNotification?: boolean;
   onCloseNotification?: () => void;
-  onViewSourceData?: () => void;
 }
 
 const segmentColors: Record<keyof SegmentData, string> = {
@@ -56,8 +55,7 @@ export default function StackedBarChart({
   onPopulationTypeChange,
   onDistrictRemove,
   showNotification = false,
-  onCloseNotification,
-  onViewSourceData
+  onCloseNotification
 }: StackedBarChartProps) {
   const [hoveredDistrict, setHoveredDistrict] = useState<string | null>(null);
   const [hoveredSegment, setHoveredSegment] = useState<{ district: string; segment: keyof SegmentData | 'urban-overview' | 'rural-overview' } | null>(null);
@@ -285,12 +283,11 @@ export default function StackedBarChart({
       <div className="flex-1 overflow-auto" style={{ minHeight: 0, overflowX: 'visible' }}>
         <div className="px-4 py-4" style={{ overflow: 'visible' }}>
           {/* Notification */}
-          {showNotification && onCloseNotification && onViewSourceData && (
+          {showNotification && onCloseNotification && (
             <div className="mb-4">
               <DataInterpretationNotification
                 isVisible={showNotification}
                 onClose={onCloseNotification}
-                onViewDetails={onViewSourceData}
               />
             </div>
           )}

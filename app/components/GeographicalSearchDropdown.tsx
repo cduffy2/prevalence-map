@@ -73,7 +73,7 @@ export default function GeographicalSearchDropdown({
   return (
     <div className="relative w-full" ref={dropdownRef}>
       {/* Search Input Field */}
-      <div className="bg-[#fbfcfe] rounded-md px-3 py-2 flex items-center gap-2">
+      <div className="bg-[#fbfcfe] rounded-md px-3 py-1.5 flex items-center gap-2">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
           <circle cx="11" cy="11" r="6" stroke="var(--primary-plain-color)" strokeWidth="2"/>
           <path d="M20 20L17 17" stroke="var(--primary-plain-color)" strokeWidth="2" strokeLinecap="round"/>

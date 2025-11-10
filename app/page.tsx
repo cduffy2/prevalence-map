@@ -9,7 +9,6 @@ import EmptyState from './components/EmptyState';
 import StackedBarChart from './components/StackedBarChart';
 import PieChart from './components/PieChart';
 import GeographicalSearchDropdown from './components/GeographicalSearchDropdown';
-import SourceDataModal from './components/SourceDataModal';
 import Footer from './components/Footer';
 import { getDistrictByName, senegalDistricts, type DistrictData } from '../lib/districtData';
 
@@ -18,7 +17,6 @@ export default function Home() {
   const [populationType, setPopulationType] = useState<'both' | 'urban' | 'rural'>('both');
   const [viewMode, setViewMode] = useState<'stacked' | 'pie'>('stacked');
   const [showNotification, setShowNotification] = useState(true);
-  const [isSourceModalOpen, setIsSourceModalOpen] = useState(false);
 
   const handleDistrictSelect = (districtName: string) => {
     const district = getDistrictByName(districtName);
@@ -67,7 +65,7 @@ export default function Home() {
             {/* Left Container - Map */}
             <div className="w-[550px] bg-white border border-[var(--primary-outlined-border)] rounded-l-lg flex flex-col" style={{ minHeight: '584px' }}>
               {/* Search Dropdown */}
-              <div className="border-b border-[var(--primary-outlined-border)] p-1">
+              <div className="border-b border-[var(--primary-outlined-border)] px-4 py-3">
                 <GeographicalSearchDropdown
                   districts={senegalDistricts.map(d => d.name)}
                   selectedDistricts={selectedDistricts.map(d => d.name)}
@@ -99,7 +97,6 @@ export default function Home() {
                   onDistrictRemove={handleDistrictRemove}
                   showNotification={showNotification}
                   onCloseNotification={() => setShowNotification(false)}
-                  onViewSourceData={() => setIsSourceModalOpen(true)}
                 />
               ) : (
                 <PieChart
@@ -116,9 +113,6 @@ export default function Home() {
 
       {/* Footer */}
       <Footer />
-
-      {/* Source Data Modal */}
-      <SourceDataModal isOpen={isSourceModalOpen} onClose={() => setIsSourceModalOpen(false)} />
     </div>
   );
 }

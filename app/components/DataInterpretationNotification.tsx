@@ -5,13 +5,11 @@ import Image from 'next/image';
 interface DataInterpretationNotificationProps {
   isVisible: boolean;
   onClose: () => void;
-  onViewDetails: () => void;
 }
 
 export default function DataInterpretationNotification({
   isVisible,
-  onClose,
-  onViewDetails
+  onClose
 }: DataInterpretationNotificationProps) {
   if (!isVisible) return null;
 
@@ -29,13 +27,7 @@ export default function DataInterpretationNotification({
       {/* Content */}
       <div className="flex-1">
         <p className="text-base text-[var(--text-secondary)]" style={{ lineHeight: '1.5' }}>
-          Pathways surveys offer helpful insights into state segment patterns, but are not designed for exact state-level results. Interpret this data carefully.{' '}
-          <button
-            onClick={onViewDetails}
-            className="text-[var(--primary-plain-color)] font-semibold hover:underline cursor-pointer"
-          >
-            View source data details
-          </button>
+          Pathways surveys offer helpful insights into state segment patterns, but are not designed for exact state-level results. Interpret this data carefully.
         </p>
       </div>
 
