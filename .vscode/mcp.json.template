@@ -1,0 +1,14 @@
+{
+	"servers": {
+		"figma-console": {
+			"command": "node",
+			"args": [
+				"/Users/ciaranduffy/Downloads/my-figma-app/figma-console-mcp/dist/index.js"
+			],
+			"env": {
+				"FIGMA_ACCESS_TOKEN": "YOUR_FIGMA_TOKEN_HERE"
+			}
+		}
+	},
+	"inputs": []
+}
