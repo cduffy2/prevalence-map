@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Image from 'next/image';
+import Button from '@mui/joy/Button';
 
 interface SourceDataModalProps {
   isOpen: boolean;
@@ -10,6 +11,7 @@ interface SourceDataModalProps {
 
 export default function SourceDataModal({ isOpen, onClose }: SourceDataModalProps) {
   const [isAnimating, setIsAnimating] = useState(false);
+  const [shouldRender, setShouldRender] = useState(false);
 
   // Close modal on escape key
   useEffect(() => {
@@ -20,12 +22,16 @@ export default function SourceDataModal({ isOpen, onClose }: SourceDataModalProp
     };
 
     if (isOpen) {
-      setIsAnimating(true);
+      setShouldRender(true);
+      // Small delay to trigger animation
+      setTimeout(() => setIsAnimating(true), 10);
       document.addEventListener('keydown', handleEscape);
       // Prevent body scroll when modal is open
       document.body.style.overflow = 'hidden';
     } else {
       setIsAnimating(false);
+      // Wait for animation to complete before unmounting
+      setTimeout(() => setShouldRender(false), 300);
     }
 
     return () => {
@@ -34,7 +40,7 @@ export default function SourceDataModal({ isOpen, onClose }: SourceDataModalProp
     };
   }, [isOpen, onClose]);
 
-  if (!isOpen) return null;
+  if (!shouldRender) return null;
 
   return (
     <div
@@ -47,15 +53,16 @@ export default function SourceDataModal({ isOpen, onClose }: SourceDataModalProp
       onClick={onClose}
     >
       <div
-        className="bg-white rounded-xl shadow-2xl max-w-[640px] w-full mx-4 max-h-[90vh] overflow-hidden flex flex-col transition-all duration-300 ease-out"
+        className="bg-white rounded-xl shadow-2xl mx-4 max-h-[90vh] overflow-hidden flex flex-col transition-all duration-300 ease-out"
         style={{
-          transform: isAnimating ? 'translateY(0)' : 'translateY(100px)',
+          width: '440px',
+          transform: isAnimating ? 'translateY(0)' : 'translateY(40px)',
           opacity: isAnimating ? 1 : 0
         }}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-5 border-b border-gray-200">
+        <div className="flex items-center justify-between px-6 py-5">
           <h2 className="text-xl font-semibold text-[var(--text-primary)]">
             Source data details
           </h2>
@@ -65,7 +72,7 @@ export default function SourceDataModal({ isOpen, onClose }: SourceDataModalProp
             aria-label="Close modal"
           >
             <Image
-              src="/Assets/Icons/close_alt.svg"
+              src="/Assets/Icons/Close.svg"
               alt="Close"
               width={20}
               height={20}
@@ -149,13 +156,30 @@ export default function SourceDataModal({ isOpen, onClose }: SourceDataModalProp
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-gray-200">
-          <button
-            onClick={onClose}
-            className="px-4 py-2 rounded-md text-sm font-semibold text-[var(--text-primary)] hover:bg-gray-50 transition-colors"
+        <div className="flex flex-col gap-3 px-6 py-4 border-t border-gray-200">
+          <Button
+            variant="plain"
+            color="primary"
+            fullWidth
+            sx={{
+              fontSize: '14px',
+              fontWeight: 600,
+            }}
           >
-            Close
-          </button>
+            Change segmentation version
+          </Button>
+          <Button
+            variant="solid"
+            color="primary"
+            fullWidth
+            onClick={onClose}
+            sx={{
+              fontSize: '14px',
+              fontWeight: 600,
+            }}
+          >
+            Close this window
+          </Button>
         </div>
       </div>
     </div>

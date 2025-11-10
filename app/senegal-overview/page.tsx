@@ -225,17 +225,17 @@ export default function SenegalOverview() {
               {/* Left Card: Compare segments */}
               <div className="flex-1 bg-white border border-[var(--primary-outlined-border)] rounded-[var(--radius-lg)] overflow-hidden">
                 {/* Header */}
-                <div className="flex items-center justify-between pl-6 pr-0 border-b border-[var(--primary-outlined-border)]" style={{ height: '48px', backgroundColor: 'var(--level-1)' }}>
-                  <h3 className="text-[20px] font-semibold leading-[1.4] text-[var(--text-primary)]">
+                <div className="flex items-center justify-between pl-4 pr-0 py-0 bg-white">
+                  <h3 className="text-xl font-semibold leading-[1.55] text-[var(--text-secondary)]">
                     Compare segments
                   </h3>
-                  <Link href="/compare-segments" className="flex items-center gap-1 px-6 h-full text-[14px] font-semibold leading-[1.42] text-[var(--primary-plain-color)] hover:bg-[#D9F0FF] transition-all">
+                  <Link href="/compare-segments" className="flex items-center gap-3 px-6 h-12 text-base font-semibold leading-4 text-[var(--primary-plain-color)] hover:bg-[#D9F0FF] transition-all rounded-[var(--radius-sm)]">
                     <span>Compare now</span>
                     <Image
                       src="/Assets/Icons/_Button_/ArrowForwardFilled.svg"
                       alt=""
-                      width={16}
-                      height={16}
+                      width={28}
+                      height={28}
                     />
                   </Link>
                 </div>
@@ -315,17 +315,17 @@ export default function SenegalOverview() {
               {/* Right Card: Explore prevalence */}
               <div className="flex-1 bg-white border border-[var(--primary-outlined-border)] rounded-[var(--radius-lg)] overflow-hidden">
                 {/* Header */}
-                <div className="flex items-center justify-between pl-6 pr-0 border-b border-[var(--primary-outlined-border)]" style={{ height: '48px', backgroundColor: 'var(--level-1)' }}>
-                  <h3 className="text-[20px] font-semibold leading-[1.4] text-[var(--text-primary)]">
+                <div className="flex items-center justify-between pl-4 pr-0 py-0 bg-white">
+                  <h3 className="text-xl font-semibold leading-[1.55] text-[var(--text-secondary)]">
                     Explore prevalence
                   </h3>
-                  <Link href="/" className="flex items-center gap-1 px-6 h-full text-[14px] font-semibold leading-[1.42] text-[var(--primary-plain-color)] hover:bg-[#D9F0FF] transition-all">
+                  <Link href="/" className="flex items-center gap-3 px-6 h-12 text-base font-semibold leading-4 text-[var(--primary-plain-color)] hover:bg-[#D9F0FF] transition-all rounded-[var(--radius-sm)]">
                     <span>Explore map</span>
                     <Image
                       src="/Assets/Icons/_Button_/ArrowForwardFilled.svg"
                       alt=""
-                      width={16}
-                      height={16}
+                      width={28}
+                      height={28}
                     />
                   </Link>
                 </div>

@@ -2,6 +2,8 @@
 
 import { useMemo, useState } from 'react';
 import Image from 'next/image';
+import Button from '@mui/joy/Button';
+import ExportModal from './ExportModal';
 
 export interface SegmentData {
   'Urban-1': number;
@@ -50,6 +52,7 @@ export default function StackedBarChart({ districts, populationType, onPopulatio
   const [hoveredBar, setHoveredBar] = useState<string | null>(null);
   const [hoveredRemoveButton, setHoveredRemoveButton] = useState<string | null>(null);
   const [showPopulationShare, setShowPopulationShare] = useState(false);
+  const [isExportModalOpen, setIsExportModalOpen] = useState(false);
 
   // Determine which districts to display
   const displayedDistricts = useMemo(() => {
@@ -217,11 +220,17 @@ export default function StackedBarChart({ districts, populationType, onPopulatio
         {/* Center: Population share toggle */}
         <div className="flex items-center gap-2">
           <div className="flex items-center gap-1.5">
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-              <path d="M8 1C4.13 1 1 4.13 1 8C1 11.87 4.13 15 8 15C11.87 15 15 11.87 15 8C15 4.13 11.87 1 8 1ZM8 13.5C4.96 13.5 2.5 11.04 2.5 8C2.5 4.96 4.96 2.5 8 2.5C11.04 2.5 13.5 4.96 13.5 8C13.5 11.04 11.04 13.5 8 13.5Z" fill="var(--primary-plain-color)"/>
-              <path d="M8.75 7.25H11V8.75H7.25V4H8.75V7.25Z" fill="var(--primary-plain-color)"/>
-            </svg>
-            <span className="text-sm text-[var(--text-tertiary)]">Bar height shows district&apos;s population share</span>
+            <Image
+              src="/Assets/Icons/InfoOutlined.svg"
+              alt="Info"
+              width={16}
+              height={16}
+            />
+            <span className="text-sm text-[var(--text-tertiary)]">
+              Bar height shows district&apos;s <span className="font-semibold">
+                {populationType === 'both' ? 'population' : populationType === 'urban' ? 'urban' : 'rural'}
+              </span> share
+            </span>
           </div>
           <label className="flex items-center gap-2 cursor-pointer">
             <input
@@ -237,15 +246,27 @@ export default function StackedBarChart({ districts, populationType, onPopulatio
         </div>
 
         {/* Right: Export button */}
-        <button className="flex items-center gap-2 px-3 py-1.5 bg-white border border-[var(--primary-outlined-border)] rounded-[var(--radius-sm)] text-sm font-semibold text-[var(--primary-plain-color)] hover:bg-[var(--primary-plain-hoverbg)] transition-colors shadow-sm">
-          <span>Export</span>
-          <Image
-            src="/Assets/Icons/Share view.svg"
-            alt="Export"
-            width={20}
-            height={20}
-          />
-        </button>
+        <Button
+          variant="plain"
+          color="primary"
+          onClick={() => setIsExportModalOpen(true)}
+          endDecorator={
+            <Image
+              src="/Assets/Icons/Share view.svg"
+              alt="Export"
+              width={20}
+              height={20}
+            />
+          }
+          sx={{
+            fontSize: '14px',
+            fontWeight: 600,
+            px: 1.5,
+            py: 0.75,
+          }}
+        >
+          Export
+        </Button>
       </div>
 
       {/* Chart Area */}
@@ -265,7 +286,7 @@ export default function StackedBarChart({ districts, populationType, onPopulatio
           </div>
 
           {/* Bars */}
-          <div className="flex flex-col" style={{ gap: '1px' }}>
+          <div className="flex flex-col" style={{ gap: showPopulationShare ? '2px' : '16px' }}>
             {displayedDistricts.map((district, idx) => {
               const { urbanPercent, ruralPercent } = calculateUrbanRuralSplit(district);
               const isDistrictHovered = hoveredDistrict === district.name || hoveredBar === district.name;
@@ -276,10 +297,22 @@ export default function StackedBarChart({ districts, populationType, onPopulatio
               // Calculate bar height with minimum of 16px and maximum of 200px
               let barHeight = 40; // Default height when toggle is OFF
               if (showPopulationShare) {
-                // Scale from 16px (min) to 200px (max) based on percentage
                 const minHeight = 16;
                 const maxHeight = 200;
-                barHeight = Math.max(minHeight, (districtPercentage / 100) * maxHeight);
+
+                // Use logarithmic scaling to make small differences more perceptible
+                // This creates more dramatic visual differences, especially in lower percentages
+                const normalizedPercent = districtPercentage / 100; // 0 to 1
+
+                // Use log10 scaling with base adjustment for better perception
+                // Add 0.01 to avoid log(0), and scale so 1% -> minHeight, 100% -> maxHeight
+                const logMin = Math.log10(0.01 + 0.01); // log of 1%
+                const logMax = Math.log10(1 + 0.01); // log of 100%
+                const logValue = Math.log10(normalizedPercent + 0.01);
+                const scaledValue = (logValue - logMin) / (logMax - logMin);
+
+                // Map to height range
+                barHeight = minHeight + (scaledValue * (maxHeight - minHeight));
               }
               const barHeightScale = barHeight / 40;
 
@@ -332,38 +365,67 @@ export default function StackedBarChart({ districts, populationType, onPopulatio
                   </div>
 
                   {/* Bars container */}
-                  <div
-                    className="flex-1 flex flex-col"
-                    style={{ gap: '1px' }}
-                  >
+                  <div className="flex-1 flex flex-col">
                     {/* Urban/Rural overview bar (8px height) - only show when 'both' is selected and toggle is OFF */}
                     {populationType === 'both' && !showPopulationShare && (
-                      <div className="w-full flex" style={{ height: '8px', minHeight: '8px' }}>
+                      <div className="w-full flex relative" style={{ height: '8px', minHeight: '8px' }}>
                       {/* Urban bar */}
                       <div
+                        className="cursor-pointer relative"
                         style={{
                           width: `${urbanPercent}%`,
                           backgroundColor: '#9ca3af',
                           height: '8px',
                           minWidth: urbanPercent > 0 ? '2px' : '0',
                           flexShrink: 0,
+                          boxSizing: 'border-box',
+                          border: hoveredSegment?.district === district.name && hoveredSegment?.segment === 'urban-overview' ? '2px solid #0b6bcb' : 'none',
                         }}
-                      />
+                        onMouseEnter={() => setHoveredSegment({ district: district.name, segment: 'urban-overview' })}
+                        onMouseLeave={() => setHoveredSegment(null)}
+                      >
+                        {/* Urban tooltip */}
+                        {hoveredSegment?.district === district.name && hoveredSegment?.segment === 'urban-overview' && (
+                          <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 z-50 rounded-[var(--radius-sm)] shadow-lg p-3 whitespace-nowrap" style={{ backgroundColor: '#383633', pointerEvents: 'none' }}>
+                            <div className="text-xs text-white">
+                              <span className="font-semibold">{Math.round(urbanPercent)}%</span> urban
+                            </div>
+                            {/* Arrow */}
+                            <div className="absolute left-1/2 -translate-x-1/2 -bottom-2 w-4 h-4 rotate-45" style={{ backgroundColor: '#383633' }}></div>
+                          </div>
+                        )}
+                      </div>
                       {/* Rural bar */}
                       <div
+                        className="cursor-pointer relative"
                         style={{
                           width: `${ruralPercent}%`,
                           backgroundColor: '#fb923c',
                           height: '8px',
                           minWidth: ruralPercent > 0 ? '2px' : '0',
                           flexShrink: 0,
+                          boxSizing: 'border-box',
+                          border: hoveredSegment?.district === district.name && hoveredSegment?.segment === 'rural-overview' ? '2px solid #0b6bcb' : 'none',
                         }}
-                      />
+                        onMouseEnter={() => setHoveredSegment({ district: district.name, segment: 'rural-overview' })}
+                        onMouseLeave={() => setHoveredSegment(null)}
+                      >
+                        {/* Rural tooltip */}
+                        {hoveredSegment?.district === district.name && hoveredSegment?.segment === 'rural-overview' && (
+                          <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 z-50 rounded-[var(--radius-sm)] shadow-lg p-3 whitespace-nowrap" style={{ backgroundColor: '#383633', pointerEvents: 'none' }}>
+                            <div className="text-xs text-white">
+                              <span className="font-semibold">{Math.round(ruralPercent)}%</span> rural
+                            </div>
+                            {/* Arrow */}
+                            <div className="absolute left-1/2 -translate-x-1/2 -bottom-2 w-4 h-4 rotate-45" style={{ backgroundColor: '#383633' }}></div>
+                          </div>
+                        )}
+                      </div>
                       </div>
                     )}
 
                     {/* Detailed segment stacked bar with gridlines */}
-                    <div className="relative h-12">
+                    <div className="relative" style={{ height: showPopulationShare ? `${barHeight}px` : '48px' }}>
                       {/* Background gridlines */}
                       <div className="absolute inset-0 flex">
                         {[...Array(10)].map((_, i) => (
@@ -375,8 +437,8 @@ export default function StackedBarChart({ districts, populationType, onPopulatio
                       <div className="absolute left-0 top-0 bottom-0 w-px bg-gray-300"></div>
 
                       {/* Stacked segments */}
-                      <div className="absolute inset-0 flex items-center">
-                        <div className="flex w-full" style={{ height: `${barHeightScale * 40}px` }}>
+                      <div className="absolute inset-0 flex">
+                        <div className="flex w-full h-full">
                           {filteredSegments.map((segment, segIdx) => {
                             const width = calculateSegmentWidth(district, segment);
                             if (width === 0) return null;
@@ -551,6 +613,9 @@ export default function StackedBarChart({ districts, populationType, onPopulatio
           )}
         </div>
       </div>
+
+      {/* Export Modal */}
+      <ExportModal isOpen={isExportModalOpen} onClose={() => setIsExportModalOpen(false)} />
     </div>
   );
 }

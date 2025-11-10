@@ -101,7 +101,7 @@ export default function PageTitle({ viewMode, onViewModeChange }: PageTitleProps
                 {/* Stacked bar chart tooltip */}
                 {hoveredStackedButton && (
                   <div
-                    className="absolute left-1/2 top-full mt-2 transform -translate-x-1/2 rounded-[var(--radius-sm)] shadow-lg p-3 whitespace-nowrap"
+                    className="absolute left-1/2 bottom-full mb-2 transform -translate-x-1/2 rounded-[var(--radius-sm)] shadow-lg p-3 whitespace-nowrap"
                     style={{
                       backgroundColor: '#383633',
                       zIndex: 9999,
@@ -112,7 +112,7 @@ export default function PageTitle({ viewMode, onViewModeChange }: PageTitleProps
                       Stacked bar charts
                     </div>
                     {/* Arrow */}
-                    <div className="absolute left-1/2 -top-2 w-4 h-4 -translate-x-1/2 rotate-45" style={{ backgroundColor: '#383633' }}></div>
+                    <div className="absolute left-1/2 -bottom-2 w-4 h-4 -translate-x-1/2 rotate-45" style={{ backgroundColor: '#383633' }}></div>
                   </div>
                 )}
               </div>
@@ -142,7 +142,7 @@ export default function PageTitle({ viewMode, onViewModeChange }: PageTitleProps
                 {/* Pie chart tooltip */}
                 {hoveredPieButton && (
                   <div
-                    className="absolute left-1/2 top-full mt-2 transform -translate-x-1/2 rounded-[var(--radius-sm)] shadow-lg p-3 whitespace-nowrap"
+                    className="absolute left-1/2 bottom-full mb-2 transform -translate-x-1/2 rounded-[var(--radius-sm)] shadow-lg p-3 whitespace-nowrap"
                     style={{
                       backgroundColor: '#383633',
                       zIndex: 9999,
@@ -153,7 +153,7 @@ export default function PageTitle({ viewMode, onViewModeChange }: PageTitleProps
                       Pie charts
                     </div>
                     {/* Arrow */}
-                    <div className="absolute left-1/2 -top-2 w-4 h-4 -translate-x-1/2 rotate-45" style={{ backgroundColor: '#383633' }}></div>
+                    <div className="absolute left-1/2 -bottom-2 w-4 h-4 -translate-x-1/2 rotate-45" style={{ backgroundColor: '#383633' }}></div>
                   </div>
                 )}
               </div>
