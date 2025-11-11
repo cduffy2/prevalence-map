@@ -55,7 +55,7 @@ export default function SourceDataModal({ isOpen, onClose }: SourceDataModalProp
       <div
         className="bg-white rounded-xl shadow-2xl mx-4 max-h-[90vh] overflow-hidden flex flex-col transition-all duration-300 ease-out"
         style={{
-          width: '440px',
+          width: '640px',
           transform: isAnimating ? 'translateY(0)' : 'translateY(40px)',
           opacity: isAnimating ? 1 : 0
         }}

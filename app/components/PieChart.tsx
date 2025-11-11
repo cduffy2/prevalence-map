@@ -2,6 +2,8 @@
 
 import { useMemo, useState } from 'react';
 import Image from 'next/image';
+import Button from '@mui/joy/Button';
+import ExportModal from './ExportModal';
 
 export interface SegmentData {
   'Urban-1': number;
@@ -48,6 +50,10 @@ export default function PieChart({ districts, populationType, onPopulationTypeCh
   const [hoveredSegment, setHoveredSegment] = useState<{ district: string; segment: keyof SegmentData } | null>(null);
   const [hoveredRemoveButton, setHoveredRemoveButton] = useState<string | null>(null);
   const [hoveredPieChart, setHoveredPieChart] = useState<string | null>(null);
+  const [hoveredDistrictTitle, setHoveredDistrictTitle] = useState<string | null>(null);
+  const [hoveredOverviewArc, setHoveredOverviewArc] = useState<{ district: string; type: 'urban' | 'rural' } | null>(null);
+  const [cursorPosition, setCursorPosition] = useState<{ x: number; y: number } | null>(null);
+  const [isExportModalOpen, setIsExportModalOpen] = useState(false);
 
   const filteredSegments = useMemo(() => {
     const allSegments: (keyof SegmentData)[] = [
@@ -102,6 +108,36 @@ export default function PieChart({ districts, populationType, onPopulationTypeCh
       const districtRuralPopulation = getRuralPopulation(district);
       return totalRuralPopulation > 0 ? (districtRuralPopulation / totalRuralPopulation) * 100 : 0;
     }
+  };
+
+  const calculateAllPercentages = (district: DistrictData) => {
+    // Total population percentage
+    const totalPopulation = senegalDistricts.reduce((sum, d) => sum + d.population, 0);
+    const totalPercent = totalPopulation > 0 ? (district.population / totalPopulation) * 100 : 0;
+
+    // Urban population percentage
+    const getUrbanPopulation = (d: DistrictData) => {
+      const urbanTotal = Object.entries(d.segments)
+        .filter(([key]) => key.startsWith('Urban'))
+        .reduce((sum, [, val]) => sum + val, 0);
+      return (urbanTotal / 100) * d.population;
+    };
+    const totalUrbanPopulation = senegalDistricts.reduce((sum, d) => sum + getUrbanPopulation(d), 0);
+    const districtUrbanPopulation = getUrbanPopulation(district);
+    const urbanPercent = totalUrbanPopulation > 0 ? (districtUrbanPopulation / totalUrbanPopulation) * 100 : 0;
+
+    // Rural population percentage
+    const getRuralPopulation = (d: DistrictData) => {
+      const ruralTotal = Object.entries(d.segments)
+        .filter(([key]) => key.startsWith('Rural'))
+        .reduce((sum, [, val]) => sum + val, 0);
+      return (ruralTotal / 100) * d.population;
+    };
+    const totalRuralPopulation = senegalDistricts.reduce((sum, d) => sum + getRuralPopulation(d), 0);
+    const districtRuralPopulation = getRuralPopulation(district);
+    const ruralPercent = totalRuralPopulation > 0 ? (districtRuralPopulation / totalRuralPopulation) * 100 : 0;
+
+    return { totalPercent, urbanPercent, ruralPercent };
   };
 
   // Helper function to generate SVG pie slice path
@@ -163,40 +199,61 @@ export default function PieChart({ districts, populationType, onPopulationTypeCh
 
       {/* Filters Section */}
       <div className="flex items-center justify-between px-4 py-3 border-b border-[var(--primary-outlined-border)]">
-        <div className="flex items-center gap-3">
-          <span className="text-sm text-[var(--text-tertiary)]">Population type:</span>
-          <div className="flex border border-[var(--primary-outlined-border)] rounded-[var(--radius-sm)] overflow-hidden">
-            <button
-              onClick={() => onPopulationTypeChange('both')}
-              className={`px-3 py-1.5 text-sm font-semibold transition-colors ${
-                populationType === 'both'
-                  ? 'bg-[var(--primary-200)] text-[var(--text-link-hover)]'
-                  : 'text-[var(--primary-outlined-color)] hover:bg-[var(--primary-plain-hoverbg)]'
-              }`}>
-              Both
-            </button>
-            <div className="w-px bg-[var(--primary-outlined-border)]" />
-            <button
-              onClick={() => onPopulationTypeChange('urban')}
-              className={`px-3 py-1.5 text-sm font-semibold transition-colors ${
-                populationType === 'urban'
-                  ? 'bg-[var(--primary-200)] text-[var(--text-link-hover)]'
-                  : 'text-[var(--primary-outlined-color)] hover:bg-[var(--primary-plain-hoverbg)]'
-              }`}>
-              Urban
-            </button>
-            <div className="w-px bg-[var(--primary-outlined-border)]" />
-            <button
-              onClick={() => onPopulationTypeChange('rural')}
-              className={`px-3 py-1.5 text-sm font-semibold transition-colors ${
-                populationType === 'rural'
-                  ? 'bg-[var(--primary-200)] text-[var(--text-link-hover)]'
-                  : 'text-[var(--primary-outlined-color)] hover:bg-[var(--primary-plain-hoverbg)]'
-              }`}>
-              Rural
-            </button>
-          </div>
+        {/* Left: Population type filter */}
+        <div className="flex border border-[var(--primary-outlined-border)] rounded-[var(--radius-sm)] overflow-hidden">
+          <button
+            onClick={() => onPopulationTypeChange('both')}
+            className={`px-3 py-1.5 text-sm font-semibold transition-colors ${
+              populationType === 'both'
+                ? 'bg-[var(--primary-200)] text-[var(--text-link-hover)]'
+                : 'text-[var(--primary-outlined-color)] hover:bg-[var(--primary-plain-hoverbg)]'
+            }`}>
+            Both
+          </button>
+          <div className="w-px bg-[var(--primary-outlined-border)]" />
+          <button
+            onClick={() => onPopulationTypeChange('urban')}
+            className={`px-3 py-1.5 text-sm font-semibold transition-colors ${
+              populationType === 'urban'
+                ? 'bg-[var(--primary-200)] text-[var(--text-link-hover)]'
+                : 'text-[var(--primary-outlined-color)] hover:bg-[var(--primary-plain-hoverbg)]'
+            }`}>
+            Urban
+          </button>
+          <div className="w-px bg-[var(--primary-outlined-border)]" />
+          <button
+            onClick={() => onPopulationTypeChange('rural')}
+            className={`px-3 py-1.5 text-sm font-semibold transition-colors ${
+              populationType === 'rural'
+                ? 'bg-[var(--primary-200)] text-[var(--text-link-hover)]'
+                : 'text-[var(--primary-outlined-color)] hover:bg-[var(--primary-plain-hoverbg)]'
+            }`}>
+            Rural
+          </button>
         </div>
+
+        {/* Right: Export button */}
+        <Button
+          variant="plain"
+          color="primary"
+          onClick={() => setIsExportModalOpen(true)}
+          endDecorator={
+            <Image
+              src="/Assets/Icons/Share view.svg"
+              alt="Export"
+              width={20}
+              height={20}
+            />
+          }
+          sx={{
+            fontSize: '14px',
+            fontWeight: 600,
+            px: 1.5,
+            py: 0.75,
+          }}
+        >
+          Export
+        </Button>
       </div>
 
       {/* Pie Charts Grid */}
@@ -232,22 +289,53 @@ export default function PieChart({ districts, populationType, onPopulationTypeCh
                 onMouseLeave={() => setHoveredPieChart(null)}
               >
                 {/* Title with percentage and remove button */}
-                <div className="flex items-center justify-between w-full px-2 py-2 relative">
-                  <div className="flex items-center gap-1">
+                <div className="flex items-center justify-center w-full px-2 py-2 relative">
+                  <div
+                    className="flex items-center gap-1.5 relative"
+                    onMouseEnter={() => setHoveredDistrictTitle(district.name)}
+                    onMouseLeave={() => setHoveredDistrictTitle(null)}
+                  >
                     <Image
                       src="/Assets/Icons/InfoOutlined.svg"
                       alt="Info"
-                      width={20}
-                      height={20}
-                      className="opacity-70"
+                      width={16}
+                      height={16}
                     />
                     <span className="text-sm font-semibold text-[var(--text-tertiary)]">
                       {district.name} ({Math.round(districtPercent)}%)
                     </span>
+
+                    {/* Tooltip */}
+                    {hoveredDistrictTitle === district.name && (() => {
+                      const { totalPercent, urbanPercent, ruralPercent } = calculateAllPercentages(district);
+                      let tooltipText = '';
+                      let percentage = 0;
+
+                      if (populationType === 'both') {
+                        percentage = totalPercent;
+                        tooltipText = 'total population';
+                      } else if (populationType === 'urban') {
+                        percentage = urbanPercent;
+                        tooltipText = 'overall urban population';
+                      } else {
+                        percentage = ruralPercent;
+                        tooltipText = 'overall rural population';
+                      }
+
+                      return (
+                        <div className="absolute left-1/2 -translate-x-1/2 top-full mt-1 z-50 rounded-[var(--radius-sm)] shadow-lg p-3 whitespace-nowrap" style={{ backgroundColor: '#383633', pointerEvents: 'none' }}>
+                          <div className="text-xs text-white">
+                            {Math.round(percentage)}% of the <span className="font-semibold" style={{ color: '#FFFFFF' }}>{tooltipText}</span>
+                          </div>
+                          {/* Arrow */}
+                          <div className="absolute left-1/2 -translate-x-1/2 -top-2 w-4 h-4 rotate-45" style={{ backgroundColor: '#383633' }}></div>
+                        </div>
+                      );
+                    })()}
                   </div>
 
-                  {/* Remove button - only show on hover */}
-                  <div className="relative w-6 h-6">
+                  {/* Remove button - only show on hover - positioned absolutely on the right */}
+                  <div className="absolute right-2 top-2 w-6 h-6">
                     {hoveredPieChart === district.name && (
                       <>
                         <button
@@ -351,12 +439,44 @@ export default function PieChart({ districts, populationType, onPopulationTypeCh
                           d={describeArcPath(0, 0, 106, 0, (ruralPercent / 100) * 360, 6)}
                           fill="#fb923c"
                           opacity="0.85"
+                          style={{ cursor: 'pointer' }}
+                          onMouseEnter={() => setHoveredOverviewArc({ district: district.name, type: 'rural' })}
+                          onMouseLeave={() => {
+                            setHoveredOverviewArc(null);
+                            setCursorPosition(null);
+                          }}
+                          onMouseMove={(e) => {
+                            const rect = e.currentTarget.getBoundingClientRect();
+                            const svgRect = e.currentTarget.ownerSVGElement?.getBoundingClientRect();
+                            if (svgRect) {
+                              setCursorPosition({
+                                x: e.clientX - svgRect.left,
+                                y: e.clientY - svgRect.top
+                              });
+                            }
+                          }}
                         />
                         {/* Urban arc (inner part, grey) */}
                         <path
                           d={describeArcPath(0, 0, 106, (ruralPercent / 100) * 360, 360, 6)}
                           fill="#9ca3af"
                           opacity="0.85"
+                          style={{ cursor: 'pointer' }}
+                          onMouseEnter={() => setHoveredOverviewArc({ district: district.name, type: 'urban' })}
+                          onMouseLeave={() => {
+                            setHoveredOverviewArc(null);
+                            setCursorPosition(null);
+                          }}
+                          onMouseMove={(e) => {
+                            const rect = e.currentTarget.getBoundingClientRect();
+                            const svgRect = e.currentTarget.ownerSVGElement?.getBoundingClientRect();
+                            if (svgRect) {
+                              setCursorPosition({
+                                x: e.clientX - svgRect.left,
+                                y: e.clientY - svgRect.top
+                              });
+                            }
+                          }}
                         />
                       </g>
                     )}
@@ -396,23 +516,36 @@ export default function PieChart({ districts, populationType, onPopulationTypeCh
                       </div>
                     );
                   })}
+
+                  {/* Tooltip for overview arcs */}
+                  {hoveredOverviewArc?.district === district.name && cursorPosition && (() => {
+                    const { urbanPercent: urbanSplit, ruralPercent: ruralSplit } = calculateUrbanRuralSplit(district);
+                    const isUrban = hoveredOverviewArc.type === 'urban';
+                    const percentage = isUrban ? urbanSplit : ruralSplit;
+                    const tooltipText = isUrban ? 'urban' : 'rural';
+
+                    // Position tooltip near cursor with offset
+                    return (
+                      <div
+                        className="absolute rounded-[var(--radius-sm)] shadow-lg p-3 whitespace-nowrap"
+                        style={{
+                          backgroundColor: '#383633',
+                          zIndex: 9999,
+                          pointerEvents: 'none',
+                          left: `${cursorPosition.x + 10}px`,
+                          top: `${cursorPosition.y + 10}px`
+                        }}
+                      >
+                        <div className="text-xs text-white">
+                          <span className="font-semibold" style={{ color: '#FFFFFF' }}>{Math.round(percentage)}% {tooltipText}</span>
+                        </div>
+                      </div>
+                    );
+                  })()}
                 </div>
               </div>
             );
           })}
-        </div>
-
-        {/* Export button */}
-        <div className="flex justify-center mt-8">
-          <button className="flex items-center gap-2 px-3 py-1.5 bg-white border border-[var(--primary-outlined-border)] rounded-[var(--radius-sm)] text-sm font-semibold text-[var(--primary-plain-color)] hover:bg-[var(--primary-plain-hoverbg)] transition-colors shadow-sm">
-            <span>Export</span>
-            <Image
-              src="/Assets/Icons/Share view.svg"
-              alt="Export"
-              width={20}
-              height={20}
-            />
-          </button>
         </div>
       </div>
 
@@ -488,6 +621,9 @@ export default function PieChart({ districts, populationType, onPopulationTypeCh
           )}
         </div>
       </div>
+
+      {/* Export Modal */}
+      <ExportModal isOpen={isExportModalOpen} onClose={() => setIsExportModalOpen(false)} />
     </div>
   );
 }

@@ -229,19 +229,11 @@ export default function StackedBarChart({
 
         {/* Center: Population share toggle */}
         <div className="flex items-center gap-2">
-          <div className="flex items-center gap-1.5">
-            <Image
-              src="/Assets/Icons/InfoOutlined.svg"
-              alt="Info"
-              width={16}
-              height={16}
-            />
-            <span className="text-sm text-[var(--text-tertiary)]">
-              Bar height shows district&apos;s <span className="font-semibold">
-                {populationType === 'both' ? 'population' : populationType === 'urban' ? 'urban' : 'rural'}
-              </span> share
-            </span>
-          </div>
+          <span className="text-sm text-[var(--text-tertiary)]">
+            Bar height shows district&apos;s <span className="font-semibold">
+              {populationType === 'both' ? 'population' : populationType === 'urban' ? 'urban' : 'rural'}
+            </span> share
+          </span>
           <label className="flex items-center gap-2 cursor-pointer">
             <input
               type="checkbox"
@@ -337,20 +329,29 @@ export default function StackedBarChart({
               return (
                 <div
                   key={idx}
-                  className="flex items-start gap-4"
+                  className="flex items-start gap-2"
                   onMouseEnter={() => setHoveredBar(district.name)}
                   onMouseLeave={() => setHoveredBar(null)}
-                  style={{ opacity }}
+                  style={{ opacity, paddingLeft: '16px' }}
                 >
                   {/* District name and percentage */}
                   <div
-                    className="w-32 flex-shrink-0 pt-1 relative"
+                    className="w-32 flex-shrink-0 pt-1 relative text-right flex items-start gap-1.5 justify-end"
                     onMouseEnter={() => setHoveredDistrict(district.name)}
                     onMouseLeave={() => setHoveredDistrict(null)}
                   >
-                    <div className="text-sm font-semibold text-[var(--text-primary)] cursor-help">{district.name}</div>
-                    <div className="text-xs text-[var(--text-tertiary)] cursor-help">
-                      ({Math.round(calculateDistrictPercentage(district))}%)
+                    <Image
+                      src="/Assets/Icons/InfoOutlined.svg"
+                      alt="Info"
+                      width={16}
+                      height={16}
+                      className="mt-0.5 flex-shrink-0"
+                    />
+                    <div className="flex flex-col items-end">
+                      <div className="text-sm font-semibold text-[var(--text-primary)]">{district.name}</div>
+                      <div className="text-xs text-[var(--text-tertiary)]">
+                        ({Math.round(calculateDistrictPercentage(district))}%)
+                      </div>
                     </div>
 
                     {/* Tooltip */}
@@ -361,19 +362,19 @@ export default function StackedBarChart({
 
                       if (populationType === 'both') {
                         percentage = totalPercent;
-                        tooltipText = 'total';
+                        tooltipText = 'total population';
                       } else if (populationType === 'urban') {
                         percentage = urbanPercent;
-                        tooltipText = 'total urban';
+                        tooltipText = 'overall urban population';
                       } else {
                         percentage = ruralPercent;
-                        tooltipText = 'total rural';
+                        tooltipText = 'overall rural population';
                       }
 
                       return (
                         <div className="absolute left-0 top-full mt-1 z-50 rounded-[var(--radius-sm)] shadow-lg p-3" style={{ backgroundColor: '#383633', pointerEvents: 'none' }}>
                           <div className="text-xs text-white">
-                            {Math.round(percentage)}% of the <span className="font-semibold">{tooltipText}</span> population
+                            {Math.round(percentage)}% of the <span className="font-semibold" style={{ color: '#FFFFFF' }}>{tooltipText}</span>
                           </div>
                           {/* Arrow */}
                           <div className="absolute left-6 -top-2 w-4 h-4 rotate-45" style={{ backgroundColor: '#383633' }}></div>

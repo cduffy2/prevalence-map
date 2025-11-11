@@ -16,7 +16,7 @@ export default function ExportModal({ isOpen, onClose }: ExportModalProps) {
   const [isAnimating, setIsAnimating] = useState(false);
   const [shouldRender, setShouldRender] = useState(false);
   const [step, setStep] = useState<1 | 2>(1);
-  const [selectedFormat, setSelectedFormat] = useState<ExportFormat>(null);
+  const [selectedFormat, setSelectedFormat] = useState<ExportFormat>('png');
   const [selectedChartType, setSelectedChartType] = useState<ChartType>('stacked');
 
   // Close modal on escape key
@@ -41,7 +41,7 @@ export default function ExportModal({ isOpen, onClose }: ExportModalProps) {
         setShouldRender(false);
         // Reset to step 1 when fully closed
         setStep(1);
-        setSelectedFormat(null);
+        setSelectedFormat('png');
         setSelectedChartType('stacked');
       }, 300);
     }
@@ -78,7 +78,7 @@ export default function ExportModal({ isOpen, onClose }: ExportModalProps) {
   const handleCancel = () => {
     // Go back to step 1
     setStep(1);
-    setSelectedFormat(null);
+    setSelectedFormat('png');
   };
 
   if (!shouldRender) return null;
