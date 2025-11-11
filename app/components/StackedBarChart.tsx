@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useRef, useEffect } from 'react';
 import Image from 'next/image';
 import Button from '@mui/joy/Button';
 import ExportModal from './ExportModal';
@@ -63,6 +63,22 @@ export default function StackedBarChart({
   const [hoveredRemoveButton, setHoveredRemoveButton] = useState<string | null>(null);
   const [showPopulationShare, setShowPopulationShare] = useState(false);
   const [isExportModalOpen, setIsExportModalOpen] = useState(false);
+  const [tooltipPosition, setTooltipPosition] = useState<{ x: number; y: number } | null>(null);
+  const iconRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
+
+  // Update tooltip position when hovering over district info icon
+  useEffect(() => {
+    if (hoveredDistrict && iconRefs.current[hoveredDistrict]) {
+      const iconElement = iconRefs.current[hoveredDistrict];
+      const rect = iconElement.getBoundingClientRect();
+      setTooltipPosition({
+        x: rect.left + rect.width / 2,
+        y: rect.bottom + 4
+      });
+    } else {
+      setTooltipPosition(null);
+    }
+  }, [hoveredDistrict]);
 
   // Determine which districts to display
   const displayedDistricts = useMemo(() => {
@@ -272,8 +288,8 @@ export default function StackedBarChart({
       </div>
 
       {/* Chart Area */}
-      <div className="flex-1 overflow-auto" style={{ minHeight: 0, overflowX: 'visible' }}>
-        <div className="px-4 py-4" style={{ overflow: 'visible' }}>
+      <div className="flex-1" style={{ minHeight: 0, overflowY: 'auto', overflowX: 'visible', position: 'relative' }}>
+        <div className="px-4 py-4" style={{ overflow: 'visible', position: 'relative', zIndex: 1 }}>
           {/* Notification */}
           {showNotification && onCloseNotification && (
             <div className="mb-4">
@@ -285,16 +301,15 @@ export default function StackedBarChart({
           )}
 
           {/* Y-axis scale */}
-          <div className="flex items-start gap-4 mb-5">
-            <div className="w-32 flex-shrink-0"></div>
-            <div className="relative" style={{ width: 'calc(100% - 176px)' }}>
+          <div className="flex items-start gap-2 mb-5">
+            <div className="flex-shrink-0" style={{ width: '100px' }}></div>
+            <div className="flex-1 relative">
               <div className="flex justify-between text-xs text-[var(--text-tertiary)] mb-2">
                 {[0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100].map(val => (
                   <span key={val} className="w-4 text-center">{val}</span>
                 ))}
               </div>
             </div>
-            <div className="w-8 flex-shrink-0"></div>
           </div>
 
           {/* Bars */}
@@ -332,55 +347,33 @@ export default function StackedBarChart({
                   className="flex items-start gap-2"
                   onMouseEnter={() => setHoveredBar(district.name)}
                   onMouseLeave={() => setHoveredBar(null)}
-                  style={{ opacity, paddingLeft: '16px' }}
+                  style={{ opacity }}
                 >
                   {/* District name and percentage */}
                   <div
-                    className="w-32 flex-shrink-0 pt-1 relative text-right flex items-start gap-1.5 justify-end"
+                    className="flex-shrink-0 pt-1 text-right flex items-start gap-1.5 justify-end"
+                    style={{ width: '100px' }}
                     onMouseEnter={() => setHoveredDistrict(district.name)}
                     onMouseLeave={() => setHoveredDistrict(null)}
                   >
-                    <Image
-                      src="/Assets/Icons/InfoOutlined.svg"
-                      alt="Info"
-                      width={16}
-                      height={16}
-                      className="mt-0.5 flex-shrink-0"
-                    />
+                    <div
+                      ref={(el) => { iconRefs.current[district.name] = el; }}
+                      className="relative"
+                    >
+                      <Image
+                        src="/Assets/Icons/InfoOutlined.svg"
+                        alt="Info"
+                        width={16}
+                        height={16}
+                        className="mt-0.5 flex-shrink-0"
+                      />
+                    </div>
                     <div className="flex flex-col items-end">
                       <div className="text-sm font-semibold text-[var(--text-primary)]">{district.name}</div>
                       <div className="text-xs text-[var(--text-tertiary)]">
                         ({Math.round(calculateDistrictPercentage(district))}%)
                       </div>
                     </div>
-
-                    {/* Tooltip */}
-                    {hoveredDistrict === district.name && (() => {
-                      const { totalPercent, urbanPercent, ruralPercent } = calculateAllPercentages(district);
-                      let tooltipText = '';
-                      let percentage = 0;
-
-                      if (populationType === 'both') {
-                        percentage = totalPercent;
-                        tooltipText = 'total population';
-                      } else if (populationType === 'urban') {
-                        percentage = urbanPercent;
-                        tooltipText = 'overall urban population';
-                      } else {
-                        percentage = ruralPercent;
-                        tooltipText = 'overall rural population';
-                      }
-
-                      return (
-                        <div className="absolute left-0 top-full mt-1 z-50 rounded-[var(--radius-sm)] shadow-lg p-3" style={{ backgroundColor: '#383633', pointerEvents: 'none' }}>
-                          <div className="text-xs text-white">
-                            {Math.round(percentage)}% of the <span className="font-semibold" style={{ color: '#FFFFFF' }}>{tooltipText}</span>
-                          </div>
-                          {/* Arrow */}
-                          <div className="absolute left-6 -top-2 w-4 h-4 rotate-45" style={{ backgroundColor: '#383633' }}></div>
-                        </div>
-                      );
-                    })()}
                   </div>
 
                   {/* Bars container */}
@@ -632,6 +625,47 @@ export default function StackedBarChart({
           )}
         </div>
       </div>
+
+      {/* Fixed position tooltip portal */}
+      {hoveredDistrict && tooltipPosition && (() => {
+        const district = displayedDistricts.find(d => d.name === hoveredDistrict);
+        if (!district) return null;
+
+        const { totalPercent, urbanPercent, ruralPercent } = calculateAllPercentages(district);
+        let tooltipText = '';
+        let percentage = 0;
+
+        if (populationType === 'both') {
+          percentage = totalPercent;
+          tooltipText = 'total population';
+        } else if (populationType === 'urban') {
+          percentage = urbanPercent;
+          tooltipText = 'overall urban population';
+        } else {
+          percentage = ruralPercent;
+          tooltipText = 'overall rural population';
+        }
+
+        return (
+          <div
+            className="fixed rounded-[var(--radius-sm)] shadow-lg p-3 whitespace-nowrap"
+            style={{
+              backgroundColor: '#383633',
+              pointerEvents: 'none',
+              zIndex: 10000,
+              left: `${tooltipPosition.x}px`,
+              top: `${tooltipPosition.y}px`,
+              transform: 'translateX(-50%)'
+            }}
+          >
+            <div className="text-xs text-white">
+              {Math.round(percentage)}% of the <span className="font-semibold" style={{ color: '#FFFFFF' }}>{tooltipText}</span>
+            </div>
+            {/* Arrow */}
+            <div className="absolute left-1/2 -translate-x-1/2 -top-2 w-4 h-4 rotate-45" style={{ backgroundColor: '#383633' }}></div>
+          </div>
+        );
+      })()}
 
       {/* Export Modal */}
       <ExportModal isOpen={isExportModalOpen} onClose={() => setIsExportModalOpen(false)} />
