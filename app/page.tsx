@@ -53,7 +53,7 @@ export default function Home() {
       <Navbar />
 
       {/* Secondary Navigation */}
-      <SecondaryNav />
+      <SecondaryNav activePage="prevalence-map" />
 
       {/* Page Title Section */}
       <PageTitle viewMode={viewMode} onViewModeChange={setViewMode} />
